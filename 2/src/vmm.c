@@ -84,11 +84,13 @@ vmm_clean (struct virtual_memory_manager *vmm)
   fprintf (stdout, "tlb hits:   %d\n", vmm->tlb_hit_count);
   fprintf (stdout, "tlb miss:   %d\n", vmm->tlb_miss_count);
   fprintf (stdout, "tlb hit ratio:   %f\n",
-           vmm->tlb_hit_count / (float)(vmm->tlb_miss_count + vmm->tlb_miss_count));
+	   vmm->tlb_hit_count / (float) (vmm->tlb_miss_count +
+					 vmm->tlb_miss_count));
   fprintf (stdout, "page found: %d\n", vmm->page_found_count);
   fprintf (stdout, "page fault: %d\n", vmm->page_fault_count);
   fprintf (stdout, "page fault ratio:   %f\n",
-           vmm->page_fault_count / (float)(vmm->page_found_count + vmm->page_fault_count));
+	   vmm->page_fault_count / (float) (vmm->page_found_count +
+					    vmm->page_fault_count));
 
   if (vmm->log)
     {
@@ -98,14 +100,14 @@ vmm_clean (struct virtual_memory_manager *vmm)
 		   "%d -> {%d, %d%d%d%d%d%d%d%d}\n",
 		   i,
 		   vmm->page_table[i].frame_number,
-                   vmm->page_table[i].flags & 1,
-                   vmm->page_table[i].flags & (1 << 1),
-                   vmm->page_table[i].flags & (1 << 2),
-                   vmm->page_table[i].flags & (1 << 3),
-                   vmm->page_table[i].flags & (1 << 4),
-                   vmm->page_table[i].flags & (1 << 5),
-                   vmm->page_table[i].flags & (1 << 6),
-                   vmm->page_table[i].flags & (1 << 7));
+		   vmm->page_table[i].flags & 1,
+		   vmm->page_table[i].flags & (1 << 1),
+		   vmm->page_table[i].flags & (1 << 2),
+		   vmm->page_table[i].flags & (1 << 3),
+		   vmm->page_table[i].flags & (1 << 4),
+		   vmm->page_table[i].flags & (1 << 5),
+		   vmm->page_table[i].flags & (1 << 6),
+		   vmm->page_table[i].flags & (1 << 7));
 	}
     }
   tlb_clean (&vmm->tlb);

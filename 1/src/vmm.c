@@ -12,7 +12,7 @@
 
 void
 vmm_init (struct virtual_memory_manager *vmm,
-	  FILE * backing_store, FILE * vmm_log, FILE * tlb_log, FILE * pm_log)
+          FILE * backing_store, FILE * vmm_log, FILE * tlb_log, FILE * pm_log)
 {
 
   // Initialise la mémoire physique.
@@ -30,25 +30,25 @@ vmm_init (struct virtual_memory_manager *vmm,
 
   // Initialise la table de page.
   for (unsigned int i; i < NUM_PAGES; i++)
-    {
-      vmm->page_table[i].flags = 0x0;
-      vmm->page_table[i].frame_number = -1;
-    }
+  {
+    vmm->page_table[i].flags = 0x0;
+    vmm->page_table[i].frame_number = -1;
+  }
 
 }
 
 
 // NE PAS MODIFIER CETTE FONCTION
 void
-vmm_log_command (FILE * out, const char *command, uint16_t laddress,	/* logical address */
-		 uint16_t page, uint16_t frame, uint16_t offset, uint16_t paddress,	/* physical address */
-		 char c)	/* char lu ou écrit */
+vmm_log_command (FILE * out, const char *command, uint16_t laddress,  /* logical address */
+                 uint16_t page, uint16_t frame, uint16_t offset, uint16_t paddress, /* physical address */
+                 char c)  /* char lu ou écrit */
 {
   if (out)
-    {
-      fprintf (out, "%s[%c]@%d: p=%d, t=%d, o=%d pa=%d\n", command, c, laddress,
-	       page, frame, offset, paddress);
-    }
+  {
+    fprintf (out, "%s[%c]@%d: p=%d, t=%d, o=%d pa=%d\n", command, c, laddress,
+             page, frame, offset, paddress);
+  }
 }
 
 /* Effectue une lecture à l'adresse logique `laddress` */
@@ -57,10 +57,13 @@ vmm_read (struct virtual_memory_manager *vmm, uint16_t laddress)
 {
 
   /* Complétez */
+  uint16_t offset = laddress & 0xFF;
+  uint16_t pageNum = laddress >> 8;
+
 
   // Vous devez fournir les arguments manquants. Basez-vous sur la signature de
   // la fonction.
-  vmm_log_command (stdout, "READING", laddress, 0, 0, 0, 0, '0');
+  vmm_log_command (stdout, "READING", laddress, pageNum, 0, offset, 0, '0');
 }
 
 /* Effectue une écriture à l'adresse logique `laddress` */
@@ -69,10 +72,25 @@ vmm_write (struct virtual_memory_manager *vmm, uint16_t laddress, char c)
 {
 
   /* Complétez */
+  uint16_t offset = laddress & 0xFF;
+  uint16_t pageNum = laddress >> 8;
+
+  int32_t frame = tlb_lookup(&vmm->tlb, pageNum);
+  if (frame == -1)
+  {
+    printf("404 frame not found!!\n");
+    //todo : trouver la page
+    vmm->tlb_miss_count++;
+  }
+  else
+  {
+    printf("we got a frame :D\n");
+    vmm->tlb_hit_count++;
+  }
 
   // Vous devez fournir les arguments manquants. Basez-vous sur la signature de
   // la fonction.
-  vmm_log_command (stdout, "WRITING", laddress, 0, 0, 0, 0, c);
+  vmm_log_command (stdout, "WRITING", laddress, pageNum, frame, offset, 0, c);
 }
 
 
@@ -84,30 +102,32 @@ vmm_clean (struct virtual_memory_manager *vmm)
   fprintf (stdout, "tlb hits:   %d\n", vmm->tlb_hit_count);
   fprintf (stdout, "tlb miss:   %d\n", vmm->tlb_miss_count);
   fprintf (stdout, "tlb hit ratio:   %f\n",
-           vmm->tlb_hit_count / (float)(vmm->tlb_miss_count + vmm->tlb_miss_count));
+           vmm->tlb_hit_count / (float) (vmm->tlb_miss_count +
+                                         vmm->tlb_miss_count));
   fprintf (stdout, "page found: %d\n", vmm->page_found_count);
   fprintf (stdout, "page fault: %d\n", vmm->page_fault_count);
   fprintf (stdout, "page fault ratio:   %f\n",
-           vmm->page_fault_count / (float)(vmm->page_found_count + vmm->page_fault_count));
+           vmm->page_fault_count / (float) (vmm->page_found_count +
+               vmm->page_fault_count));
 
   if (vmm->log)
+  {
+    for (unsigned int i = 0; i < NUM_PAGES; i++)
     {
-      for (unsigned int i = 0; i < NUM_PAGES; i++)
-	{
-	  fprintf (vmm->log,
-		   "%d -> {%d, %d%d%d%d%d%d%d%d}\n",
-		   i,
-		   vmm->page_table[i].frame_number,
-                   vmm->page_table[i].flags & 1,
-                   vmm->page_table[i].flags & (1 << 1),
-                   vmm->page_table[i].flags & (1 << 2),
-                   vmm->page_table[i].flags & (1 << 3),
-                   vmm->page_table[i].flags & (1 << 4),
-                   vmm->page_table[i].flags & (1 << 5),
-                   vmm->page_table[i].flags & (1 << 6),
-                   vmm->page_table[i].flags & (1 << 7));
-	}
+      fprintf (vmm->log,
+               "%d -> {%d, %d%d%d%d%d%d%d%d}\n",
+               i,
+               vmm->page_table[i].frame_number,
+               vmm->page_table[i].flags & 1,
+               vmm->page_table[i].flags & (1 << 1),
+               vmm->page_table[i].flags & (1 << 2),
+               vmm->page_table[i].flags & (1 << 3),
+               vmm->page_table[i].flags & (1 << 4),
+               vmm->page_table[i].flags & (1 << 5),
+               vmm->page_table[i].flags & (1 << 6),
+               vmm->page_table[i].flags & (1 << 7));
     }
+  }
   tlb_clean (&vmm->tlb);
   pm_clean (&vmm->pm);
 }

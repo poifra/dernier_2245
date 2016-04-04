@@ -12,9 +12,9 @@ pm_init (struct physical_memory *pm, FILE * backing_store, FILE * pm_log)
   pm->log = pm_log;
 
   for (unsigned int i = 0; i < PHYSICAL_MEMORY_SIZE; i++)
-    {
-      pm->memory[i] = ' ';
-    }
+  {
+    pm->memory[i] = ' ';
+  }
 }
 
 // Retourne le numéro d'une trame (frame) libre
@@ -32,7 +32,7 @@ pm_demand_page (struct physical_memory *pm, uint16_t page_number)
 // Sauvegarde la page spécifiée
 void
 pm_backup_frame (struct physical_memory *pm, uint16_t frame_number,
-		 uint16_t page_number)
+                 uint16_t page_number)
 {
 }
 
@@ -43,13 +43,13 @@ pm_clean (struct physical_memory *pm)
 
   // Enregistre l'état de la mémoire physique.
   if (pm->log)
+  {
+    for (unsigned int i = 0; i < PHYSICAL_MEMORY_SIZE; i++)
     {
-      for (unsigned int i = 0; i < PHYSICAL_MEMORY_SIZE; i++)
-	{
-	  if (i % 80 == 0)
-	    fprintf (pm->log, "%c\n", pm->memory[i]);
-	  else
-	    fprintf (pm->log, "%c", pm->memory[i]);
-	}
+      if (i % 80 == 0)
+        fprintf (pm->log, "%c\n", pm->memory[i]);
+      else
+        fprintf (pm->log, "%c", pm->memory[i]);
     }
+  }
 }
