@@ -9,10 +9,10 @@ void
 tlb_init (struct tlb *tlb, FILE * log)
 {
   for (unsigned int i = 0; i < TLB_NUM_ENTRIES; i++)
-  {
-    tlb->entries[i].page_number = -1;
-    tlb->entries[i].frame_number = -1;
-  }
+    {
+      tlb->entries[i].page_number = -1;
+      tlb->entries[i].frame_number = -1;
+    }
 
   tlb->log = log;
   tlb->next_entry_available = 0;
@@ -24,15 +24,15 @@ void
 tlb_clean (struct tlb *tlb)
 {
   if (tlb->log)
-  {
-    for (unsigned int i = 0; i < TLB_NUM_ENTRIES; i++)
     {
-      fprintf (tlb->log,
-               "%d: %d -> %d\n",
-               i,
-               tlb->entries[i].page_number, tlb->entries[i].frame_number);
+      for (unsigned int i = 0; i < TLB_NUM_ENTRIES; i++)
+	{
+	  fprintf (tlb->log,
+		   "%d: %d -> %d\n",
+		   i,
+		   tlb->entries[i].page_number, tlb->entries[i].frame_number);
+	}
     }
-  }
 }
 
 
@@ -42,12 +42,12 @@ tlb_clean (struct tlb *tlb)
 int32_t
 tlb_lookup (struct tlb *tlb, uint16_t page_number)
 {
-   for (unsigned int i = 0; i < TLB_NUM_ENTRIES; i++)
+  for (unsigned int i = 0; i < TLB_NUM_ENTRIES; i++)
     {
-      if( tlb->entries[i].page_number == page_number)
-        return tlb->entries[i].frame_number;
+      if (tlb->entries[i].page_number == page_number)
+	return tlb->entries[i].frame_number;
     }
-    return -1;
+  return -1;
   // Complétez cette fonction.
 }
 

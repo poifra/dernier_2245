@@ -6,6 +6,10 @@ format: $(DEPS)
 	cd 1/src/ && make format
 	cd 2/src/ && make format
 
+all: $(DEPS)
+	cd 1/src/ && make
+	cd 2/src/ && make
+
 rapport: rapport.tex
 	pdflatex rapport.tex
 
