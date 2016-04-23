@@ -59,21 +59,38 @@ vmm_read (struct virtual_memory_manager *vmm, uint16_t laddress)
   /* Complétez */
   uint16_t offset = laddress & 0xFF;
   uint16_t pageNum = laddress >> 8;
+  uint16_t physAdress;
+  uint16_t frameNum;
+
+  char charRead;
 
   page pageToLoad = vmm->page_table[pageNum];
-  if (pageToLoad->flags & 0x1) //if verification bit, aka if page is loaded
-  {
-    vmm->page_found_count++;
-  }
+  if (pageToLoad.flags & 0x1)	//if verification bit, aka if page is loaded
+    {
+      vmm->page_found_count++;
+      frameNum = (uint16_t) pageToLoad.frame_number;
+      physAdress = frameNum*PAGE_FRAME_SIZE + offset;
+      charRead = vmm->pm.memory[physAdress];
+
+    }
   else
-  {
-    //todo : load page
-    vmm->page_fault_count++;
-  }
+    {
+      /* 
+      1. find free frame
+      2. read page from backing store
+      3. place read page in frame
+      4. set page flag loaded flag
+      */
+      printf("this is not the page you are looking for...\n");
+      frameNum = pm_demand_page(&vmm->pm,pageNum);
+      pm_backup_frame(&vmm->pm,frameNum,pageNum);
+      vmm->page_fault_count++;
+    }
 
   // Vous devez fournir les arguments manquants. Basez-vous sur la signature de
   // la fonction.
-  vmm_log_command (stdout, "READING", laddress, pageNum, 0, offset, 0, '0');
+  vmm_log_command (stdout, "READING", laddress, pageNum, frameNum, offset,
+		   physAdress, charRead);
 }
 
 /* Effectue une écriture à l'adresse logique `laddress` */

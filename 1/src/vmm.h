@@ -15,11 +15,11 @@ enum page_flags
   dirty        = 0x2
 };
 
-struct page
+typedef struct page
 {
   uint8_t flags;
   int32_t frame_number;
-};
+} page;
 
 struct virtual_memory_manager
 {
