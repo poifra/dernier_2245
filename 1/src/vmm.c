@@ -60,33 +60,46 @@ vmm_read (struct virtual_memory_manager *vmm, uint16_t laddress)
   uint16_t offset = laddress & 0xFF;
   uint16_t pageNum = laddress >> 8;
   uint16_t physAdress;
-  uint16_t frameNum;
+  int32_t frameNum;
 
   char charRead;
 
-  page pageToLoad = vmm->page_table[pageNum];
-  if (pageToLoad.flags & 0x1)	//if verification bit, aka if page is loaded
+  //page pageToLoad = vmm->page_table[pageNum];
+  frameNum = tlb_lookup (&vmm->tlb, pageNum);
+  if (frameNum == -1)
+    {
+      //tlb lookup failed
+      printf ("Page not in TLB. Bummer.");
+      vmm->tlb_miss_count++;
+      frameNum = vmm->page_table[pageNum].frame_number;
+      tlb_add_entry (&vmm->tlb, pageNum, frameNum);
+    }
+  else
+    vmm->tlb_hit_count++;
+
+  if (vmm->page_table[pageNum].flags & 0x1)	//if verification bit, aka if page is loaded
     {
       vmm->page_found_count++;
-      frameNum = (uint16_t) pageToLoad.frame_number;
-      physAdress = frameNum*PAGE_FRAME_SIZE + offset;
-      charRead = vmm->pm.memory[physAdress];
-
     }
   else
     {
-      /* 
-      1. find free frame
-      2. read page from backing store
-      3. place read page in frame
-      4. set page flag loaded flag
-      */
-      printf("this is not the page you are looking for...\n");
-      frameNum = pm_demand_page(&vmm->pm,pageNum);
-      pm_backup_frame(&vmm->pm,frameNum,pageNum);
+      /* page fault
+         1. find free frame
+         2. read page from backing store
+         3. place read page in frame
+         4. set page verification flag
+       */
+      printf
+	("This page seems to be all hidey and not loaded. Let's take care of that...\n");
+      frameNum = pm_demand_page (&vmm->pm, pageNum);
+      //      pm_backup_frame(&vmm->pm,frameNum,pageNum);
+      vmm->page_table[pageNum].frame_number = frameNum;
+      vmm->page_table[pageNum].flags |= 0x1;	//page is loaded. set verification bit
       vmm->page_fault_count++;
     }
 
+  physAdress = ((uint16_t) frameNum) * PAGE_FRAME_SIZE + offset;
+  charRead = vmm->pm.memory[physAdress];
   // Vous devez fournir les arguments manquants. Basez-vous sur la signature de
   // la fonction.
   vmm_log_command (stdout, "READING", laddress, pageNum, frameNum, offset,
@@ -101,12 +114,15 @@ vmm_write (struct virtual_memory_manager *vmm, uint16_t laddress, char c)
   /* Complétez */
   uint16_t offset = laddress & 0xFF;
   uint16_t pageNum = laddress >> 8;
+  uint16_t physAdress;
 
-  int32_t frame = tlb_lookup (&vmm->tlb, pageNum);
-  if (frame == -1)
+  int32_t frameNum = tlb_lookup (&vmm->tlb, pageNum);
+  if (frameNum == -1)
     {
-      printf ("404 frame not found!!\n");
+      printf ("Page not in TLB. Bummer.");
       //todo : trouver la page
+      frameNum = vmm->page_table[pageNum].frame_number;
+      tlb_add_entry (&vmm->tlb, pageNum, frameNum);
       vmm->tlb_miss_count++;
     }
   else
@@ -114,10 +130,35 @@ vmm_write (struct virtual_memory_manager *vmm, uint16_t laddress, char c)
       printf ("we got a frame :D\n");
       vmm->tlb_hit_count++;
     }
+  if (vmm->page_table[pageNum].flags & 0x1)	//if verification bit, aka if page is loaded
+    {
+      vmm->page_found_count++;
+    }
+  else
+    {
+      /* page fault
+         1. find free frame
+         2. read page from backing store
+         3. place read page in frame
+         4. set page verification flag
+       */
+      printf
+	("This page seems to be all hidey and not loaded. Let's take care of that...\n");
+      frameNum = (uint16_t) pm_demand_page (&vmm->pm, pageNum);
+      //      pm_backup_frame(&vmm->pm,frameNum,pageNum);
+      vmm->page_table[pageNum].frame_number = frameNum;
+      vmm->page_table[pageNum].flags |= 0x1;	//page is loaded. set verification bit
+      vmm->page_fault_count++;
+    }
+
+  vmm->page_table[pageNum].flags |= 0x2;	//Set dirty flag and verification flag
+  physAdress = ((uint16_t) frameNum) * PAGE_FRAME_SIZE + offset;
+  vmm->pm.memory[physAdress] = c;
 
   // Vous devez fournir les arguments manquants. Basez-vous sur la signature de
   // la fonction.
-  vmm_log_command (stdout, "WRITING", laddress, pageNum, frame, offset, 0, c);
+  vmm_log_command (stdout, "WRITING", laddress, pageNum, frameNum, offset, 0,
+		   c);
 }
 
 

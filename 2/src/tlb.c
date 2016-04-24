@@ -18,7 +18,6 @@ tlb_init (struct tlb *tlb, FILE * log)
   tlb->next_entry_available = 0;
 }
 
-
 // Ne pas modifier cette fonction
 void
 tlb_clean (struct tlb *tlb)
@@ -42,6 +41,13 @@ tlb_clean (struct tlb *tlb)
 int32_t
 tlb_lookup (struct tlb *tlb, uint16_t page_number)
 {
+  for (unsigned int i = 0; i < TLB_NUM_ENTRIES; i++)
+    {
+      if (tlb->entries[i].page_number == page_number)
+	tlb->entries[i].freq++;
+      return tlb->entries[i].frame_number;
+    }
+  return -1;
   // Complétez cette fonction.
 }
 
@@ -52,4 +58,28 @@ void
 tlb_add_entry (struct tlb *tlb, uint16_t page_number, uint16_t frame_number)
 {
   // Complétez cette fonction.
+  int lfu;
+  if (tlb->next_entry_available < TLB_NUM_ENTRIES)
+    {
+      tlb->entries[tlb->next_entry_available].page_number = page_number;
+      tlb->entries[tlb->next_entry_available].frame_number = frame_number;
+      tlb->entries[tlb->next_entry_available].freq = 1;
+      tlb->next_entry_available++;
+    }
+  else
+    {
+      //LRU replacement
+      for (unsigned int i = 0; i < TLB_NUM_ENTRIES; i++)
+	{
+	  if (tlb->entries[i].freq < tlb->entries[lfu].freq)
+	    {
+	      lfu = i;
+	    }
+	}
+      //replace with new entry
+      tlb->entries[lfu].page_number = page_number;
+      tlb->entries[lfu].frame_number = frame_number;
+      tlb->entries[lfu].freq = 1;
+    }
+  return;
 }

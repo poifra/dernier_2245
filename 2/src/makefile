@@ -33,9 +33,11 @@ format: $(DEPS)
 OBJ = $(patsubst %.c,$(BUILD_DIR)/obj/%.o, $(DEPS))
 
 $(BUILD_DIR)/obj/%.o: %.c $(DEPS)
+	mkdir -p $(BUILD_DIR)/obj
 	$(CC) -c $(CFLAGS) -o $@ $< 
 
 $(BUILD_DIR)/vm: $(OBJ)
+	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ $^ 
 
 clean:

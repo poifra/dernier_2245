@@ -2,11 +2,13 @@
 #define TLB_H
 
 #include "conf.h"
+#include <time.h>
 
 struct tlb_entry
 {
   int32_t page_number;
   int32_t frame_number;
+  int freq;
 };
 
 struct tlb
