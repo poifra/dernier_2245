@@ -9,7 +9,20 @@
 
 \maketitle
 
-allo comment ça va?
-%% ¡¡ REMPLIR ICI !!
+\section{Algorithmes de remplacement du TLB}
+Les deux algorithmes de remplacement choisi pour les TLB sont le \emph{least frequently used} et le \emph{least recently used}.
+Un avantage partagée par ces deux algorithmes est qu'ils sont simple à implémenter.
+
+Le TLB utilisant l'algorithme LRU ajoute un champ \verbatim{time_t used} aux entrées du TLB indiquant le temps(en temps UNIX) de la dernière utilisation de l'entrée. Lors d'un lookup, cette valeur est mise à jours. Lors d'un remplacement, l'entrée ayant la plus petite valeur(i.e. celle ayant été utilisé le moins récemment) est remplacée(et son champ \verbatim{used} mise à jours).
+
+Le TLB utilisant l'algorithme LFU ajoute un compteur d'utilisation aux entrées du TLB. Lors d'un lookup, le compteur de l'entrée est incrémenté. Lors d'un remplacement, l'entré ayant le plus petit compteur(i.e. l'entré accèdée la moins fréquemment) est remplacée(et son compteur remis à 1).
+
+L'algorithme LRU se base sur la présomption qu'une entrée qui n'as pas été accèdée récemment ne le sera probablement pas dans le future, alors qu'une entrée accèdée récemment le sera probablement aussi dans le future proche, alors que algorithme LFU se base sur la présomption similaire qu'une entrée qui n'est pas accèdée fréquemment sera peu probablement accèdée dans le future, et que les fréquences d'utilisation sont relativement stable.
+
+Les deux algorithme partage l'inconvénient que leur efficacité dépend fortement du contexte d'utilisation des entrées. Par exemple, dans le cas du LRU, une entrée peut êre accèdée à un intervalle régulier. Si l'intervalle d'accès est large, l'entrée risque fortement de se faire évincée même si elle va être accèdée.
+Dans le cas du LFU, une entrée peut être accèdée fréquemment dans un petit intervalle de temps, et peu ou plus du tout par après, ce qui lui donne un avantage de départ injuste sur des entrées accèdées régulièrement mais à une fréquence plus basse.
+
+En générale, ces algorithmes sont modifié et mélanger avec d'autres algorithmes de remplacement pour prendre en compte les motifs d'accès qu'ils ne gère pas bien.
+
 
 \end{document}
