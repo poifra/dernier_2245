@@ -9,6 +9,10 @@
 
 \maketitle
 
+\section{fonctionnement}
+Lors d'une requête de lecture ou d'écriture, le TLB est accèdé en premier. Si le lookup est un succès, le numéro de frame retournée est utilisé, les flag de la page sont accèdé et vérifié. Si le bit de vérification n'est pas levé, il s'agit d'un page fault. La page est alors lu dans le backing store et une nouvelle frame est allouée dans la mémoire physique, la table des page et le TLB mis à jours.
+
+
 \section{Algorithmes de remplacement du TLB}
 Les deux algorithmes de remplacement choisi pour les TLB sont le \emph{least frequently used} et le \emph{least recently used}.
 Un avantage partagée par ces deux algorithmes est qu'ils sont simple à implémenter.
@@ -22,7 +26,9 @@ L'algorithme LRU se base sur la présomption qu'une entrée qui n'as pas été a
 Les deux algorithme partage l'inconvénient que leur efficacité dépend fortement du contexte d'utilisation des entrées. Par exemple, dans le cas du LRU, une entrée peut êre accèdée à un intervalle régulier. Si l'intervalle d'accès est large, l'entrée risque fortement de se faire évincée même si elle va être accèdée.
 Dans le cas du LFU, une entrée peut être accèdée fréquemment dans un petit intervalle de temps, et peu ou plus du tout par après, ce qui lui donne un avantage de départ injuste sur des entrées accèdées régulièrement mais à une fréquence plus basse.
 
-En générale, ces algorithmes sont modifié et mélanger avec d'autres algorithmes de remplacement pour prendre en compte les motifs d'accès qu'ils ne gère pas bien.
+En pratique, ces algorithmes sont modifiés et mélangés avec d'autres algorithmes de remplacement pour prendre en compte les motifs d'accès qu'ils ne gèrent pas bien.
 
+\section{Problèmes}
+Il semble que les statistiques ne soient pas affectée par l'algorithme de remplacement utilisé. Ceci peut être un problème relier au \emph{logging} des résultats d'accès, ou au méchanisme d'accès lui même.
 
 \end{document}
