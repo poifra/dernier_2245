@@ -1,5 +1,5 @@
 CC=cc
-CFLAGS=-I. -std=c11 -pedantic-errors -D_POSIX_SOURCE
+CFLAGS=-I. -g -std=c11 -pedantic-errors -D_POSIX_SOURCE
 
 LEX=flex
 LEXFLAGS=
