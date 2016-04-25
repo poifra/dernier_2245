@@ -10,7 +10,7 @@
 \maketitle
 
 \section{fonctionnement}
-Lors d'une requête de lecture ou d'écriture, le TLB est accèdé en premier. Si le lookup est un succès, le numéro de frame retournée est utilisé, les flag de la page sont accèdé et vérifié. Si le bit de vérification n'est pas levé, il s'agit d'un page fault. La page est alors lu dans le backing store et une nouvelle frame est allouée dans la mémoire physique, la table des page et le TLB mis à jours.
+Lors d'une requête de lecture ou d'écriture, le TLB est accèdé en premier. Si le lookup est un succès, le numéro de frame retournée est utilisé, les flag de la page sont accèdé et vérifié. Si le bit de vérification n'est pas levé, il s'agit d'un page fault. La page est alors lue dans le backing store et une nouvelle frame est allouée dans la mémoire physique, la table des page et le TLB mis à jours. Le numéro de frame retournée par la nouvelle allocation est utilisée pour la requête. Si le lookup dans le TLB est un échec, la table des page est accèdée directement, le bit de vérification vérifié, et une nouvelle entrée ajoutée dans le TLB.
 
 
 \section{Algorithmes de remplacement du TLB}
