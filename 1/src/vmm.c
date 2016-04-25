@@ -97,10 +97,10 @@ vmm_read (struct virtual_memory_manager *vmm, uint16_t laddress)
 {
 
 	/* Complétez */
-	uint16_t offset = laddress & 256;
+	uint16_t offset = laddress & 255;
 	uint16_t pageNum = laddress >> 8;
-	uint16_t physAdress;
-	int32_t frameNum;
+	uint16_t physAdress = 0;
+	int32_t frameNum = 0;
 
 	char charRead;
 
@@ -171,5 +171,5 @@ vmm_clean (struct virtual_memory_manager *vmm)
 		}
 	}
 	tlb_clean (&vmm->tlb);
-	pm_clean (&vmm->pm);
+	pm_clean (&vmm->pm, vmm->page_table);
 }
